@@ -1,2 +1,4 @@
-NAMA = DITO GILANG PERMADI
-NPM = 24782073
+# 👤 Profil
+
+- **Nama**: Dito Gilang Permadi  
+- **NPM**: 24782073  
