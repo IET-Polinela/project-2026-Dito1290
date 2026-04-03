@@ -10,5 +10,6 @@ urlpatterns = [
     path('welcome/', welcome),
     path('', include('main_app.urls')),
     path('about/', include('about.urls')),
-    path('contacts/', include('contacts.urls')),  
+    path('contacts/', include('contacts.urls')),
+    path('', include('main_app.urls')),  
 ]

@@ -1,0 +1,14 @@
+<h2>Daftar Laporan</h2>
+
+<a href="/add/">Tambah Laporan</a>
+
+<ul>
+    {% for report in reports %}
+        <li>
+            <b>{{ report.title }}</b> - {{ report.category }} - {{ report.location }}
+            <br>
+            <a href="/edit/{{ report.id }}">Edit</a>
+            <a href="/delete/{{ report.id }}">Delete</a>
+        </li>
+    {% endfor %}
+</ul>
