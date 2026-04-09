@@ -1,0 +1,16 @@
+{% for report in reports %}
+    <p>{{ report.title }} - {{ report.status }}</p>
+
+    <form method="post" action="{% url 'update_status' report.id %}">
+        {% csrf_token %}
+        
+        {% if report.status == 'REPORTED' %}
+            <button name="status" value="VERIFIED">Verify</button>
+        {% elif report.status == 'VERIFIED' %}
+            <button name="status" value="IN_PROGRESS">Process</button>
+        {% elif report.status == 'IN_PROGRESS' %}
+            <button name="status" value="RESOLVED">Resolve</button>
+        {% endif %}
+    </form>
+
+{% endfor %}
