@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Form Laporan</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-success"
+    onclick="this.innerText='Loading...'; this.disabled=true;">
+        Submit
+    </button>
+
+    <a href="{% url 'report_list' %}" class="btn btn-secondary">Kembali</a>
+</form>
+{% endblock %}

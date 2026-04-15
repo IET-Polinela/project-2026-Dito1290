@@ -3,9 +3,9 @@ from .views import *
 
 urlpatterns = [
     path('', ReportListView.as_view(), name='report_list'),
-    path('detail/<int:pk>/', ReportDetailView.as_view(), name='report_detail'),
-    path('add/', ReportCreateView.as_view(), name='report_add'),
-    path('edit/<int:pk>/', ReportUpdateView.as_view(), name='report_edit'),
-    path('delete/<int:pk>/', ReportDeleteView.as_view(), name='report_delete'),
-    path('update-status/<int:pk>/', ReportUpdateStatusView.as_view(), name='update_status'),
+    path('<int:pk>/', ReportDetailView.as_view(), name='report_detail'),
+    path('create/', ReportCreateView.as_view(), name='report_create'),
+    path('<int:pk>/update/', ReportUpdateView.as_view(), name='report_update'),
+    path('<int:pk>/delete/', ReportDeleteView.as_view(), name='report_delete'),
+    path('<int:pk>/status/', ReportUpdateStatusView.as_view(), name='update_status'),
 ]
