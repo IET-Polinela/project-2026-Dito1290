@@ -24,7 +24,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # App kustom kamu
     'main_app',
+    'usermanagement_24782073', # <-- Tambahan Lab 6
 ]
 
 
@@ -65,7 +67,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'npm24782073_iet_2026.wsgi.application'
 
 
-# DATABASE (PostgreSQL)
+# DATABASE (PostgreSQL - Milik Dito)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -99,5 +101,28 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 
-# DEFAULT PRIMARY KEY (FIX WARNING)
+# DEFAULT PRIMARY KEY
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# =============================================================================
+# AUTHENTICATION CONFIGURATION (TAMBAHAN LAB 6)
+# =============================================================================
+
+# Mengarahkan Django menggunakan Custom User Model
+AUTH_USER_MODEL = 'usermanagement_24782073.CustomUser'
+
+# URL Konfigurasi Autentikasi
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'report_list'  
+LOGOUT_REDIRECT_URL = 'login'
+
+# Konfigurasi Pesan Feedback (Bootstrap style)
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.DEBUG: 'secondary',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}
