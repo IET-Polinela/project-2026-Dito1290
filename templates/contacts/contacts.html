@@ -1,1 +1,47 @@
-<h1>ini contacts</h1>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content-card">
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <h1 class="section-title">Kontak & Dukungan</h1>
+            <p class="lead text-muted">Hubungi tim kami jika Anda membutuhkan bantuan atau ingin memberikan saran untuk peningkatan sistem.</p>
+            <div class="row row-cols-1 row-cols-md-2 g-3 mt-4">
+                <div class="col">
+                    <div class="p-4 rounded-4 bg-white shadow-sm h-100">
+                        <h6>Alamat Kantor</h6>
+                        <p class="text-muted mb-0">Politeknik Negeri Lampung</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="p-4 rounded-4 bg-white shadow-sm h-100">
+                        <h6>Email</h6>
+                        <p class="text-muted mb-0">gilangpermadid@gmail.com</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="p-4 rounded-4 bg-white shadow-sm h-100">
+                        <h6>Telepon</h6>
+                        <p class="text-muted mb-0">085789673531</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="p-4 rounded-4 bg-white shadow-sm h-100">
+                        <h6>Jam Kerja</h6>
+                        <p class="text-muted mb-0">Senin - Jumat, 08:00 - 16:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="p-4 rounded-4 bg-primary text-white shadow-sm h-100">
+                <h5 class="mb-3">Perlu Bantuan?</h5>
+                <p>Jika Anda menemui kendala saat menggunakan sistem, tim kami siap membantu. Silakan gunakan informasi kontak di samping untuk menghubungi kami.</p>
+                <div class="mt-4">
+                    <a href="{% url 'report_list' %}" class="btn btn-light btn-modern text-primary">Mulai Lapor</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

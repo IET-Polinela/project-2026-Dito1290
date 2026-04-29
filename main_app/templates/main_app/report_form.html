@@ -1,17 +1,20 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Form Laporan</h2>
-
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-
-    <button type="submit" class="btn btn-success"
-    onclick="this.innerText='Loading...'; this.disabled=true;">
-        Submit
-    </button>
-
-    <a href="{% url 'report_list' %}" class="btn btn-secondary">Kembali</a>
-</form>
+<div class="content-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="section-title">Form Laporan</h2>
+            <p class="text-muted">Isi data laporan Anda dengan lengkap agar penanganan bisa diproses lebih cepat.</p>
+        </div>
+    </div>
+    <form method="post" class="row g-3">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="col-12 d-flex gap-2 justify-content-start">
+            <button type="submit" class="btn btn-primary btn-modern">Simpan</button>
+            <a href="{% url 'report_list' %}" class="btn btn-outline-secondary btn-modern">Batal</a>
+        </div>
+    </form>
+</div>
 {% endblock %}

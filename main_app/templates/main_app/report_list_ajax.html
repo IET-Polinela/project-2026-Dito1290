@@ -1,0 +1,50 @@
+<div class="content-card">
+    {% if query %}
+        <div class="alert alert-info mb-3">
+            <strong>Hasil pencarian untuk "{{ query }}":</strong> Ditemukan {{ reports|length }} laporan.
+        </div>
+    {% endif %}
+
+    {% if not reports %}
+        <div class="alert alert-info mb-0 rounded-4 shadow-sm">
+            Belum ada laporan saat ini. Silakan tambahkan laporan baru untuk memulai.
+        </div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr class="text-muted small text-uppercase">
+                        <th>Judul</th>
+                        <th>Lokasi</th>
+                        <th>Status</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td class="fw-semibold">{{ report.title }}</td>
+                        <td>{{ report.location }}</td>
+                        <td>
+                            {% if report.status == 'REPORTED' %}
+                                <span class="badge badge-status bg-secondary">Reported</span>
+                            {% elif report.status == 'VERIFIED' %}
+                                <span class="badge badge-status bg-primary">Verified</span>
+                            {% elif report.status == 'IN_PROGRESS' %}
+                                <span class="badge badge-status bg-warning text-dark">In Progress</span>
+                            {% else %}
+                                <span class="badge badge-status bg-success">Resolved</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'report_detail' report.pk %}" class="btn btn-outline-primary btn-sm me-1">Detail</a>
+                            <a href="{% url 'report_update' report.pk %}" class="btn btn-outline-warning btn-sm me-1">Edit</a>
+                            <a href="{% url 'report_delete' report.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Yakin ingin hapus?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>

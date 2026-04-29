@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+.dashboard-hero {
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.14), rgba(56, 189, 248, 0.12));
+    border: 1px solid rgba(13, 110, 253, 0.15);
+    backdrop-filter: blur(10px);
+}
+.dashboard-summary .card {
+    border: none;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+}
+.dashboard-section .card {
+    border: none;
+    border-radius: 24px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+.dashboard-section .card-header {
+    background: transparent;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.dashboard-section .card-body {
+    padding-top: 0.75rem;
+}
+.chart-card canvas {
+    min-height: 320px;
+}
+.list-group-item {
+    border: none;
+    border-radius: 16px;
+    margin-bottom: 0.75rem;
+    background: #ffffff;
+}
+.list-group-item:last-child {
+    margin-bottom: 0;
+}
+.detail-btn {
+    min-width: 100px;
+}
+</style>
+
+<div class="container mt-5">
+    <div class="dashboard-hero p-4 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">Dashboard Laporan</h1>
+                <p class="text-muted mb-0">Pantau status laporan, kategori, dan temukan laporan terbaru secara cepat.</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'report_list' %}" class="btn btn-primary btn-lg rounded-pill px-4">Lihat Semua Laporan</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row dashboard-section g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card chart-card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Distribusi Status Laporan</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card chart-card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Distribusi Kategori Laporan</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row dashboard-section g-4 mb-4">
+        <div class="col-xl-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">5 Laporan Terbaru (Reported)</h5>
+                    <span class="badge bg-info text-dark">REPORTED</span>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group" id="recent-reported">
+                        <!-- Data akan diisi oleh JS -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">5 Laporan Terbaru (Resolved)</h5>
+                    <span class="badge bg-success">RESOLVED</span>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group" id="recent-resolved">
+                        <!-- Data akan diisi oleh JS -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row dashboard-section g-4 mb-5">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Informasi Laporan</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">Live search tersedia di halaman <strong>Daftar Laporan</strong>. Klik tombol di atas untuk membuka daftar laporan dan mencari secara langsung.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Detail Laporan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="report-modal-body">
+                <!-- Detail laporan akan diisi di sini -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// ========== DEBUG: Pastikan Script Berjalan ==========
+console.log('✅ Script dashboard.html sudah dijalankan');
+console.log('📍 Menunggu DOM siap...');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOMContentLoaded fired! DOM sudah siap.');
+    let statusChart, categoryChart;
+    // ========== FETCH DATA DARI BACKEND ==========
+    console.log('🔄 Mulai fetch /dashboard/data/ ...');
+    fetch('/dashboard/data/')
+        .then(response => {
+            console.log('📍 Response received:', response);
+            console.log('📊 Status code:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Data berhasil diterima dari backend:', data);
+            
+            // Extract data
+            const statusLabels = data.status.map(item => item.status);
+            const statusValues = data.status.map(item => item.total);
+            const categoryLabels = data.category.map(item => item.category);
+            const categoryValues = data.category.map(item => item.total);
+            
+            console.log('📊 Status Labels:', statusLabels);
+            console.log('📊 Status Values:', statusValues);
+            console.log('📊 Category Labels:', categoryLabels);
+            console.log('📊 Category Values:', categoryValues);
+
+            // ========== BUAT DOUGHNUT CHART (STATUS) ==========
+            try {
+                const statusCtx = document.getElementById('statusChart').getContext('2d');
+                statusChart = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusValues,
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                console.log('✅ Doughnut Chart (Status) berhasil dibuat');
+            } catch (err) {
+                console.error('❌ Error membuat Doughnut Chart:', err);
+            }
+
+            // ========== BUAT BAR CHART (KATEGORI) ==========
+            try {
+                const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+                categoryChart = new Chart(categoryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: categoryLabels,
+                        datasets: [{
+                            label: 'Jumlah Laporan',
+                            data: categoryValues,
+                            backgroundColor: '#36A2EB'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        indexAxis: 'x',
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                console.log('✅ Bar Chart (Kategori) berhasil dibuat');
+            } catch (err) {
+                console.error('❌ Error membuat Bar Chart:', err);
+            }
+
+            // ========== TAMPILKAN RECENT REPORTED ==========
+            try {
+                const reportedList = document.getElementById('recent-reported');
+                if (data.recent_reported.length === 0) {
+                    reportedList.innerHTML = '<li class="list-group-item">Belum ada laporan REPORTED.</li>';
+                    console.log('⚠️  Tidak ada laporan REPORTED');
+                } else {
+                    data.recent_reported.forEach(report => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        li.innerHTML = `
+                            ${report.title} - ${report.location}
+                            <button class="btn btn-sm btn-info detail-btn" data-id="${report.id}">Detail</button>
+                        `;
+                        reportedList.appendChild(li);
+                    });
+                    console.log(`✅ ${data.recent_reported.length} laporan REPORTED ditampilkan`);
+                }
+            } catch (err) {
+                console.error('❌ Error menampilkan Recent Reported:', err);
+            }
+
+            // ========== TAMPILKAN RECENT RESOLVED ==========
+            try {
+                const resolvedList = document.getElementById('recent-resolved');
+                if (data.recent_resolved.length === 0) {
+                    resolvedList.innerHTML = '<li class="list-group-item">Belum ada laporan RESOLVED.</li>';
+                    console.log('⚠️  Tidak ada laporan RESOLVED');
+                } else {
+                    data.recent_resolved.forEach(report => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        li.innerHTML = `
+                            ${report.title} - ${report.location}
+                            <button class="btn btn-sm btn-info detail-btn" data-id="${report.id}">Detail</button>
+                        `;
+                        resolvedList.appendChild(li);
+                    });
+                    console.log(`✅ ${data.recent_resolved.length} laporan RESOLVED ditampilkan`);
+                }
+            } catch (err) {
+                console.error('❌ Error menampilkan Recent Resolved:', err);
+            }
+        })
+        .catch(error => {
+            console.error('❌ ERROR: Gagal fetch data dashboard', error);
+            console.error('📍 Error details:', error.message);
+            console.error('📍 Stack trace:', error.stack);
+            document.getElementById('statusChart').parentElement.innerHTML = '<p class="text-danger">❌ Gagal memuat data status.</p>';
+            document.getElementById('categoryChart').parentElement.innerHTML = '<p class="text-danger">❌ Gagal memuat data kategori.</p>';
+        });
+
+    // Live search telah dipindahkan ke halaman Daftar Laporan. Menghindari search ganda di dashboard.
+    function getStatusBadge(status) {
+        const badges = {
+            'REPORTED': 'badge bg-secondary',
+            'VERIFIED': 'badge bg-primary',
+            'IN_PROGRESS': 'badge bg-warning text-dark',
+            'RESOLVED': 'badge bg-success'
+        };
+        const labels = {
+            'REPORTED': 'Reported',
+            'VERIFIED': 'Verified',
+            'IN_PROGRESS': 'In Progress',
+            'RESOLVED': 'Resolved'
+        };
+        return `<span class="${badges[status] || 'badge bg-secondary'}">${labels[status] || status}</span>`;
+    }
+
+    // ========== EVENT DELEGATION - TOMBOL DETAIL ==========
+    console.log('✅ Event delegation untuk tombol detail sudah siap');
+    
+    document.addEventListener('click', function(e) {
+        const detailButton = e.target.closest('.detail-btn');
+        if (!detailButton) {
+            return;
+        }
+
+        const reportId = detailButton.getAttribute('data-id');
+        console.log(`🔄 Fetch detail laporan ID: ${reportId}`);
+        
+        const reportDetailUrl = `/dashboard/report/${reportId}/`;
+        fetch(reportDetailUrl, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+            .then(response => {
+                console.log('📍 Detail response:', response.status);
+                if (!response.ok) {
+                    throw new Error('Tidak dapat memuat detail laporan');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('✅ Detail laporan diterima:', data);
+                const modalBody = document.getElementById('report-modal-body');
+                modalBody.innerHTML = `
+                    <p><strong>Judul:</strong> ${data.title}</p>
+                    <p><strong>Kategori:</strong> ${data.category}</p>
+                    <p><strong>Deskripsi:</strong> ${data.description}</p>
+                    <p><strong>Lokasi:</strong> ${data.location}</p>
+                    <p><strong>Status:</strong> ${getStatusBadge(data.status)}</p>
+                    <p><strong>Dibuat:</strong> ${data.created_at}</p>
+                `;
+                const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+                modal.show();
+                console.log('✅ Modal detail ditampilkan');
+            })
+            .catch(error => {
+                console.error('❌ Error detail laporan:', error);
+                alert('❌ Gagal memuat detail laporan. Coba lagi.');
+            });
+    });
+});
+</script>
+{% endblock %}

@@ -1,1 +1,69 @@
-<h1>Selamat Datang di kota BANDAR LAMPUNG</h1>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero-banner">
+    <div class="row align-items-center">
+        <div class="col-lg-7">
+            <span class="badge rounded-pill bg-light text-primary mb-3">Selamat Datang</span>
+            <h1 class="display-5 fw-bold text-white">Kota Bandar Lampung Lebih Pintar</h1>
+            <p class="lead text-white-75">Solusi pelaporan warga yang modern, mudah, dan responsif. Ajukan laporan, pantau status, dan ikut bantu menjadikan kota lebih bersih dan teratur.</p>
+            <div class="mt-4">
+                <a href="{% url 'report_list' %}" class="btn btn-light btn-modern text-primary me-2">Lihat Laporan</a>
+                <a href="{% url 'register' %}" class="btn btn-outline-light btn-modern">Daftar Citizen</a>
+            </div>
+        </div>
+        <div class="col-lg-5 text-center mt-5 mt-lg-0">
+            <div class="bg-white rounded-4 p-4 shadow-sm">
+                <h5 class="mb-3">Statistik Singkat</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-4">
+                    <div>
+                        <span class="d-block text-muted">Laporan Masuk</span>
+                        <strong class="fs-4">128</strong>
+                    </div>
+                    <i class="bi bi-file-earmark-text-fill fs-1 text-primary"></i>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-4">
+                    <div>
+                        <span class="d-block text-muted">Terselesaikan</span>
+                        <strong class="fs-4">94</strong>
+                    </div>
+                    <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+                </div>
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-4">
+                    <div>
+                        <span class="d-block text-muted">Dalam Proses</span>
+                        <strong class="fs-4">18</strong>
+                    </div>
+                    <i class="bi bi-clock-fill fs-1 text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="row gy-4">
+        <div class="col-md-4">
+            <div class="p-4 rounded-4 bg-white shadow-sm h-100">
+                <div class="mb-3 text-primary"><i class="bi bi-people-fill fs-2"></i></div>
+                <h5>Citizen Friendly</h5>
+                <p class="text-muted">Laporan dibuat dan dilacak oleh warga secara real time.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 rounded-4 bg-white shadow-sm h-100">
+                <div class="mb-3 text-primary"><i class="bi bi-shield-lock-fill fs-2"></i></div>
+                <h5>Aman & Terpercaya</h5>
+                <p class="text-muted">Data dilindungi dan prosesnya tercatat setiap langkah.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 rounded-4 bg-white shadow-sm h-100">
+                <div class="mb-3 text-primary"><i class="bi bi-speedometer2 fs-2"></i></div>
+                <h5>Respons Cepat</h5>
+                <p class="text-muted">Tim respons siap menindaklanjuti laporan dengan workflow yang jelas.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

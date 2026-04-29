@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     # App kustom kamu
     'main_app',
     'usermanagement_24782073', # <-- Tambahan Lab 6
+    'dashboard_24782073',  # <-- Tambahan untuk dashboard
 ]
 
 

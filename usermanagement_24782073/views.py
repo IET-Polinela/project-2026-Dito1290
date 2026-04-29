@@ -1,8 +1,10 @@
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib import messages
-from .forms import CitizenRegistrationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .forms import CitizenRegistrationForm, ProfileForm
+from .models import CustomUser
 
 class CitizenRegisterView(CreateView):
     form_class = CitizenRegistrationForm
@@ -11,6 +13,19 @@ class CitizenRegisterView(CreateView):
 
     def form_valid(self, form):
         messages.success(self.request, "Registrasi berhasil! Silakan login.")
+        return super().form_valid(form)
+
+class ProfileView(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    form_class = ProfileForm
+    template_name = 'registration/profile.html'
+    success_url = reverse_lazy('profile')
+
+    def get_object(self):
+        return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "Profil berhasil diperbarui.")
         return super().form_valid(form)
 
 class CustomLoginView(LoginView):

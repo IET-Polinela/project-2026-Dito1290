@@ -1,1 +1,44 @@
-<h1>ini about</h1>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content-card">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-6">
+            <h1 class="section-title">Tentang Smart City</h1>
+            <p class="lead text-muted">Platform ini dibuat untuk membantu warga Bandar Lampung melaporkan masalah kota dengan cepat dan mudah, serta memantau proses tindak lanjut dari laporan tersebut.</p>
+            <ul class="list-group list-group-flush mt-4">
+                <li class="list-group-item border-0 p-0 mb-2 d-flex align-items-start gap-3">
+                    <i class="bi bi-check-circle-fill text-primary fs-4"></i>
+                    <div>
+                        <strong>Transparan</strong>
+                        <p class="mb-0 text-muted">Setiap laporan mengikuti alur yang jelas hingga selesai.</p>
+                    </div>
+                </li>
+                <li class="list-group-item border-0 p-0 mb-2 d-flex align-items-start gap-3">
+                    <i class="bi bi-people-fill text-primary fs-4"></i>
+                    <div>
+                        <strong>Kolaboratif</strong>
+                        <p class="mb-0 text-muted">Warga dan pihak pengelola bisa berkontribusi bersama.</p>
+                    </div>
+                </li>
+                <li class="list-group-item border-0 p-0 d-flex align-items-start gap-3">
+                    <i class="bi bi-graph-up-arrow fs-4 text-primary"></i>
+                    <div>
+                        <strong>Efisien</strong>
+                        <p class="mb-0 text-muted">Meningkatkan kecepatan penanganan dan kualitas layanan publik.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="col-lg-6">
+            <div class="p-4 rounded-4 bg-light shadow-sm">
+                <h5 class="mb-3">Misi Kami</h5>
+                <p class="text-muted">Menciptakan lingkungan kota yang lebih aman, bersih, dan cepat tanggap terhadap keluhan warga dengan dukungan teknologi.</p>
+                <div class="mt-4">
+                    <a href="{% url 'report_list' %}" class="btn btn-primary btn-modern">Lihat Laporan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,59 +1,445 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-<h2>Daftar Laporan</h2>
-
-<a href="{% url 'report_create' %}" class="btn btn-primary mb-3">
-    + Tambah Laporan
-</a>
-
-{% if not reports %}
-    <div class="alert alert-info">
-        Belum ada laporan
+<div class="hero-banner">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+        <div>
+            <span class="badge rounded-pill bg-light text-primary mb-3">Smart City Dashboard</span>
+            <h1 class="display-6 fw-bold">Daftar Laporan</h1>
+            <p class="mb-0 text-white-75">Pantau semua laporan warga dengan tampilan modern, cepat, dan mudah digunakan.</p>
+        </div>
+        <div>
+            <a href="{% url 'report_create' %}" class="btn btn-light btn-modern text-primary">+ Tambah Laporan</a>
+        </div>
     </div>
-{% else %}
+</div>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Judul</th>
-            <th>Lokasi</th>
-            <th>Status</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-
-        {% for report in reports %}
-        <tr>
-            <td>{{ report.title }}</td>
-            <td>{{ report.location }}</td>
-
-            <td>
-                {% if report.status == 'REPORTED' %}
-                    <span class="badge bg-secondary">Reported</span>
-                {% elif report.status == 'VERIFIED' %}
-                    <span class="badge bg-primary">Verified</span>
-                {% elif report.status == 'IN_PROGRESS' %}
-                    <span class="badge bg-warning text-dark">In Progress</span>
-                {% else %}
-                    <span class="badge bg-success">Resolved</span>
+<div class="content-card mb-4">
+    <div class="row">
+        <div class="col-12">
+            <form id="searchForm" class="d-flex gap-2 position-relative">
+                <input type="text" id="searchInput" name="q" value="{{ query }}" class="form-control" placeholder="Cari berdasarkan judul, deskripsi, kategori, atau lokasi..." style="flex: 1;">
+                <button id="searchBtn" type="submit" class="btn btn-primary">Cari</button>
+                {% if query %}
+                    <a href="#" class="btn btn-outline-secondary" onclick="document.getElementById('searchInput').value=''; document.getElementById('searchBtn').click(); return false;">Reset</a>
                 {% endif %}
-            </td>
+            </form>
+        </div>
+    </div>
+</div>
 
-            <td>
-                <a href="{% url 'report_detail' report.pk %}" class="btn btn-info btn-sm">Detail</a>
-                <a href="{% url 'report_update' report.pk %}" class="btn btn-warning btn-sm">Edit</a>
-                <a href="{% url 'report_delete' report.pk %}" class="btn btn-danger btn-sm"
-                   onclick="return confirm('Yakin ingin hapus?')">Delete</a>
-            </td>
-        </tr>
-        {% endfor %}
+<div id="reportListContainer" class="content-card">
+    <div id="searchResultsMessage">
+        {% if query %}
+            <div class="alert alert-info mb-3">
+                <strong>Hasil pencarian untuk "{{ query }}":</strong> Ditemukan {{ reports|length }} laporan.
+            </div>
+        {% endif %}
+    </div>
 
-    </tbody>
-</table>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-muted small text-uppercase">
+                    <th>Judul</th>
+                    <th>Lokasi</th>
+                    <th>Status</th>
+                    <th class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="reportTableBody">
+                {% if reports %}
+                    {% for report in reports %}
+                    <tr>
+                        <td class="fw-semibold">{{ report.title }}</td>
+                        <td>{{ report.location }}</td>
+                        <td>
+                            {% if report.status == 'REPORTED' %}
+                                <span class="badge badge-status bg-secondary">Reported</span>
+                            {% elif report.status == 'VERIFIED' %}
+                                <span class="badge badge-status bg-primary">Verified</span>
+                            {% elif report.status == 'IN_PROGRESS' %}
+                                <span class="badge badge-status bg-warning text-dark">In Progress</span>
+                            {% else %}
+                                <span class="badge badge-status bg-success">Resolved</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'report_detail' report.pk %}" class="btn btn-outline-primary btn-sm me-1">Detail</a>
+                            <a href="{% url 'report_update' report.pk %}" class="btn btn-outline-warning btn-sm me-1">Edit</a>
+                            <a href="{% url 'report_delete' report.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Yakin ingin hapus?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            {% if query %}
+                                Tidak ada laporan yang cocok untuk "{{ query }}". Silakan coba kata kunci lain.
+                            {% else %}
+                                Belum ada laporan saat ini. Silakan tambahkan laporan baru untuk memulai.
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
 
-{% endif %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Report list page loaded');
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('searchForm');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchResultsMessage = document.getElementById('searchResultsMessage');
+    const reportTableBody = document.getElementById('reportTableBody');
+    const searchEndpoint = '/reports/search/';
+    let searchTimeout;
 
+    function escapeHtml(text) {
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function showSearchingIndicator() {
+        const indicator = searchForm.querySelector('.search-indicator');
+        if (!indicator) {
+            const div = document.createElement('div');
+            div.className = 'search-indicator';
+            div.innerHTML = '<small class="text-muted">Mencari...</small>';
+            div.style.cssText = 'position: absolute; right: 120px; top: 50%; transform: translateY(-50%);';
+            searchForm.style.position = 'relative';
+            searchForm.appendChild(div);
+        }
+    }
+
+    function hideSearchingIndicator() {
+        const indicator = searchForm.querySelector('.search-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
+    function renderReportRows(reports) {
+        if (!reports.length) {
+            return `
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        Tidak ada laporan yang cocok. Silakan coba kata kunci lain.
+                    </td>
+                </tr>
+            `;
+        }
+
+        return reports.map(report => {
+            return `
+                <tr>
+                    <td class="fw-semibold">${escapeHtml(report.title)}</td>
+                    <td>${escapeHtml(report.location)}</td>
+                    <td>${getStatusBadge(report.status)}</td>
+                    <td class="text-center">
+                        <a href="/${report.id}/" class="btn btn-outline-primary btn-sm me-1">Detail</a>
+                        <a href="/${report.id}/update/" class="btn btn-outline-warning btn-sm me-1">Edit</a>
+                        <a href="/${report.id}/delete/" class="btn btn-outline-danger btn-sm" onclick="return confirm('Yakin ingin hapus?')">Delete</a>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function renderSearchSummary(count, query) {
+        if (!query) {
+            return '';
+        }
+
+        if (!count) {
+            return `
+                <div class="alert alert-info mb-3">
+                    <strong>Hasil pencarian untuk "${escapeHtml(query)}":</strong> Tidak ada laporan yang cocok.
+                </div>
+            `;
+        }
+
+        return `
+            <div class="alert alert-info mb-3">
+                <strong>Hasil pencarian untuk "${escapeHtml(query)}":</strong> Ditemukan ${count} laporan.
+            </div>
+        `;
+    }
+
+    function performSearch(query) {
+        showSearchingIndicator();
+        const url = `${searchEndpoint}?q=${encodeURIComponent(query)}`;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                hideSearchingIndicator();
+                searchResultsMessage.innerHTML = renderSearchSummary(data.count, data.query);
+                reportTableBody.innerHTML = renderReportRows(data.results);
+            })
+            .catch(error => {
+                hideSearchingIndicator();
+                searchResultsMessage.innerHTML = `
+                    <div class="alert alert-danger mb-3">
+                        <strong>Error:</strong> Gagal memuat hasil pencarian. Silakan coba lagi.
+                    </div>
+                `;
+                reportTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-danger py-4">
+                            Terjadi kesalahan saat memuat laporan.
+                        </td>
+                    </tr>
+                `;
+                console.error('Search error:', error);
+            });
+    }
+
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = searchInput.value.trim();
+            performSearch(query);
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => performSearch(query), 300);
+        });
+    }
+
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            const query = searchInput.value.trim();
+            performSearch(query);
+        });
+    }
+});
+</script>
+
+<!-- Modal Detail -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Detail Laporan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="report-modal-body">
+                <!-- Detail laporan akan diisi oleh JavaScript -->
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Memuat detail laporan...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Function to get status badge HTML
+function getStatusBadge(status) {
+    const badgeClasses = {
+        'REPORTED': 'badge bg-secondary',
+        'VERIFIED': 'badge bg-primary',
+        'IN_PROGRESS': 'badge bg-warning text-dark',
+        'RESOLVED': 'badge bg-success'
+    };
+    const labels = {
+        'REPORTED': 'Reported',
+        'VERIFIED': 'Verified',
+        'IN_PROGRESS': 'In Progress',
+        'RESOLVED': 'Resolved'
+    };
+    return `<span class="${badgeClasses[status] || 'badge bg-secondary'}">${labels[status] || status}</span>`;
+}
+
+// Event delegation for detail buttons
+document.addEventListener('click', function(e) {
+    const detailButton = e.target.closest('.btn-outline-primary');
+    if (!detailButton || !detailButton.href) {
+        return;
+    }
+
+    if (!detailButton.href.includes('/')) {
+        return;
+    }
+
+    e.preventDefault();
+    const reportDetailUrl = detailButton.getAttribute('href');
+    const match = reportDetailUrl.match(/(\d+)\/?$/);
+    const reportId = match ? match[1] : null;
+    if (!reportId) {
+        return;
+    }
+
+    console.log(`🔄 Fetch detail laporan ID: ${reportId}`);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+    modal.show();
+    
+    // Fetch report detail
+    fetch(reportDetailUrl, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+        .then(response => {
+            console.log('📍 Detail response:', response.status);
+            if (!response.ok) {
+                throw new Error('Tidak dapat memuat detail laporan');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Detail laporan diterima:', data);
+            const modalBody = document.getElementById('report-modal-body');
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6 class="text-primary mb-3">Informasi Laporan</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-semibold" style="width: 120px;">Judul:</td>
+                                <td>${data.title}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold">Kategori:</td>
+                                <td>${data.category}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold">Lokasi:</td>
+                                <td>${data.location}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold">Status:</td>
+                                <td>${getStatusBadge(data.status)}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold">Dibuat:</td>
+                                <td>${data.created_at}</td>
+                            </tr>
+                        </table>
+                        
+                        <h6 class="text-primary mb-3 mt-4">Deskripsi</h6>
+                        <div class="bg-light p-3 rounded">
+                            ${data.description || '<em class="text-muted">Tidak ada deskripsi</em>'}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-primary mb-3">Status Timeline</h6>
+                        <div class="timeline">
+                            <div class="timeline-item ${data.status === 'REPORTED' ? 'active' : ''}">
+                                <div class="timeline-marker bg-secondary"></div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">Reported</small>
+                                </div>
+                            </div>
+                            <div class="timeline-item ${data.status === 'VERIFIED' ? 'active' : ''}">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">Verified</small>
+                                </div>
+                            </div>
+                            <div class="timeline-item ${data.status === 'IN_PROGRESS' ? 'active' : ''}">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">In Progress</small>
+                                </div>
+                            </div>
+                            <div class="timeline-item ${data.status === 'RESOLVED' ? 'active' : ''}">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">Resolved</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('❌ Error detail laporan:', error);
+            const modalBody = document.getElementById('report-modal-body');
+            modalBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> Gagal memuat detail laporan. Silakan coba lagi.
+                </div>
+            `;
+        });
+});
+</script>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.timeline-item.active {
+    opacity: 1;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 15px;
+    width: 2px;
+    height: 25px;
+    background: #dee2e6;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid #dee2e6;
+}
+</style>
 {% endblock %}

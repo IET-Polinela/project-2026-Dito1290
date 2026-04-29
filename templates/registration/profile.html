@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+        <div class="content-card">
+            <div class="text-center mb-4">
+                <h3 class="section-title mb-1">Profil Pengguna</h3>
+                <p class="text-muted">Perbarui informasi profil Anda.</p>
+            </div>
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success btn-modern w-100">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
