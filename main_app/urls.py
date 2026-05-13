@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from .views import *
 
 urlpatterns = [
@@ -9,4 +9,5 @@ urlpatterns = [
     path('<int:pk>/update/', ReportUpdateView.as_view(), name='report_update'),
     path('<int:pk>/delete/', ReportDeleteView.as_view(), name='report_delete'),
     path('<int:pk>/status/', ReportUpdateStatusView.as_view(), name='update_status'),
+    path('api/', include('main_app.api_urls')),
 ]
