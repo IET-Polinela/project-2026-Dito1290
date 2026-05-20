@@ -1,24 +1,7 @@
-from rest_framework.permissions import BasePermission
+from rest_framework import permissions
 
-
-class IsCitizen(BasePermission):
-    """Hanya user yang login DAN bukan staff/admin yang bisa create laporan."""
-    message = "Hanya warga (Citizen) yang dapat membuat laporan."
-
-    def has_permission(self, request, view):
-        return bool(
-            request.user and
-            request.user.is_authenticated and
-            not request.user.is_staff
-        )
-
-
-class IsOwnerAndDraft(BasePermission):
-    """Edit dan Delete hanya oleh pemilik laporan DAN status masih DRAFT."""
-    message = "Hanya pemilik laporan dengan status DRAFT yang dapat mengubah atau menghapus laporan."
-
+class IsOwnerAndDraftOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return bool(
-            obj.reporter == request.user and
-            obj.status == 'DRAFT'
-        )
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.reporter == request.user and obj.status == 'DRAFT'
