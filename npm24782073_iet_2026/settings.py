@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework', 
+    'rest_framework_simplejwt',
 
     # App kustom kamu
     'main_app',
@@ -127,4 +128,10 @@ MESSAGE_TAGS = {
     messages.SUCCESS: 'success',
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
 }
