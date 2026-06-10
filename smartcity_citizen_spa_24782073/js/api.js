@@ -2,7 +2,7 @@
 // SECURE API REQUEST HANDLER (Lab 12)
 // Menangani JWT Token Authorization
 // ========================================
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = "http://103.151.63.87:8007";
 
 /**
  * requestAPI() - Fungsi untuk membuat request HTTP ke Backend Django REST Framework
