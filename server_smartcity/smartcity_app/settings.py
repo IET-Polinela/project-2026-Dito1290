@@ -27,12 +27,13 @@ INSTALLED_APPS = [
     'corsheaders',  # Harus di atas rest_framework
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',    # [TAMBAHAN LAB 14]
     'main_app',
     'usermanagement_24782073',
     'dashboard_24782073',
 ]
 
-# 3. Urutan Middleware (CorsMiddleware diletakkan paling atas demi kelancaran API)
+# 3. Urutan Middleware
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -63,9 +64,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'smartcity_app.wsgi.application'
 
-# 4. Pengaturan Database Lokal
-#   - Default: SQLite untuk development lokal agar runserver tidak gagal
-#   - Ubah ke PostgreSQL dengan environment variable jika diperlukan di server kampus
+# 4. Pengaturan Database Lokal / Server
 DB_ENGINE = os.environ.get('DJANGO_DB_ENGINE', 'django.db.backends.sqlite3')
 if DB_ENGINE == 'django.db.backends.sqlite3':
     DATABASES = {
@@ -100,12 +99,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-
-# 5. Lokasi pengumpulan file statis untuk Nginx di Server (Sesuai Instruksi Lab)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 AUTH_USER_MODEL = 'usermanagement_24782073.CustomUser'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'report_list'
@@ -119,7 +115,9 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
+# 5. Konfigurasi REST Framework & OpenAPI [TAMBAHAN LAB 14]
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -132,20 +130,12 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-# ===== CORS Settings (Mengizinkan Akses Lintas Origin Penuh Khusus Praktikum) =====
+# ===== CORS Settings =====
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-
 CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
+    'accept', 'accept-encoding', 'authorization', 'content-type',
+    'dnt', 'origin', 'user-agent', 'x-csrftoken', 'x-requested-with',
 ]
 
 # ===== JWT Configuration =====
@@ -156,4 +146,21 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
+}
+
+# ===== [TAMBAHAN LAB 14] OpenAPI Metadata Settings =====
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Smart City Portal API',
+    'DESCRIPTION': 'Dokumentasi REST API resmi untuk Portal Pelaporan Laporan Warga',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SECURITY': [{'BearerAuth': []}],
+    'SECURITY_SCHEMES': {
+        'BearerAuth': {
+            'type': 'http',
+            'scheme': 'bearer',
+            'bearerFormat': 'JWT',
+        }
+    },
 }
