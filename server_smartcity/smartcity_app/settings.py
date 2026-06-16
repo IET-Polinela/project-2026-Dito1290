@@ -150,17 +150,14 @@ SIMPLE_JWT = {
 
 # ===== [TAMBAHAN LAB 14] OpenAPI Metadata Settings =====
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Smart City Portal API',
-    'DESCRIPTION': 'Dokumentasi REST API resmi untuk Portal Pelaporan Laporan Warga',
-    'VERSION': '1.0.0',
+    'TITLE': '🏙️ Smart City Portal API Dashboard',
+    'DESCRIPTION': (
+        'Dokumentasi REST API resmi untuk ekosistem Portal Pelaporan Layanan Warga.\n\n'
+        '**Fitur Utama backend:**\n'
+        '* 🔐 Autentikasi Keamanan tingkat tinggi menggunakan JWT Token\n'
+        '* 📊 Pelaporan Real-time terintegrasi dengan Aplikasi SPA'
+    ),
+    'VERSION': '1.4.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
-    'SECURITY': [{'BearerAuth': []}],
-    'SECURITY_SCHEMES': {
-        'BearerAuth': {
-            'type': 'http',
-            'scheme': 'bearer',
-            'bearerFormat': 'JWT',
-        }
-    },
 }
