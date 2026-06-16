@@ -2,8 +2,9 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
 
-# [TAMBAHAN LAB 14] Import modul Spectacular
+# ===== [TAMBAHAN LAB 14] Import modul Spectacular =====
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.views.generic import TemplateView  # <-- Kita pakai view bawaan Django
 
 from main_app.views import ReportSearchView
 from usermanagement_24782073.views import CustomLoginView, CustomLogoutView, CitizenRegisterView, ProfileView
@@ -24,9 +25,19 @@ urlpatterns = [
     # ===== [TAMBAHAN LAB 14] URL Paths untuk API Documentation =====
     # 1. Endpoint untuk meng-generate file skema mentah (JSON/YAML)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    
     # 2. Endpoint Swagger UI (Interaktif untuk testing API)
     path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    # 3. Endpoint Scalar UI belum tersedia karena paket Scalar UI belum dipasang.
+    
+    # 3. Endpoint Scalar UI (Menggunakan CDN resmi drf-spectacular - Bebas Eror Modul!)
+    path(
+        'api/docs/scalar/',
+        TemplateView.as_view(
+            template_name='scalar.html',
+            extra_context={'schema_url': 'schema'}
+        ),
+        name='scalar-ui'
+    ),
 
     # ===== JWT Authentication =====
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
