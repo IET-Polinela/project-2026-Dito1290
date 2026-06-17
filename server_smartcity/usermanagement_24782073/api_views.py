@@ -9,12 +9,12 @@ from drf_spectacular.utils import extend_schema
 User = get_user_model()
 
 
-# ===== [PERBAIKAN SKENARIO 1] Menambahkan exclude=True untuk menyembunyikan dari dokumentasi =====
+# ===== [PERBAIKAN FINAL SKENARIO 1] Dipisah menjadi decorator mandiri agar bebas eror =====
+@extend_schema(exclude=True)
 @extend_schema(
     tags=['🔐 Autentikasi & Akun Warga'],
     summary="Registrasi akun Citizen baru",
-    description="Endpoint ini digunakan untuk mendaftarkan akun warga (Citizen) baru ke dalam sistem portal Smart City.",
-    exclude=True  # <-- TAMBAHAN DI SINI BIAR HILANG DARI SCALAR/SWAGGER UI
+    description="Endpoint ini digunakan untuk mendaftarkan akun warga (Citizen) baru ke dalam sistem portal Smart City."
 )
 class RegisterView(generics.CreateAPIView):
     """
