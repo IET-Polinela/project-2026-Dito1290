@@ -10,11 +10,10 @@ from django.contrib.messages import constants as messages
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = 'django-insecure-wi-y!!6cnfq0ulxyxs)xq77v!@40(13m3=3=mgy7p7-9&gv(jn'
-DEBUG = True
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-wi-y!!6cnfq0ulxyxs)xq77v!@40(13m3=3=mgy7p7-9&gv(jn')
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('1', 'true', 'yes', 'on')
 
-# 1. Mengizinkan semua host mengakses server (Sesuai Instruksi Lab)
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,103.151.63.87').split(',') if host.strip()]
 
 # 2. Daftar aplikasi pendukung dan lokal proyek kamu
 INSTALLED_APPS = [
@@ -97,7 +96,7 @@ TIME_ZONE = 'Asia/Jakarta'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
